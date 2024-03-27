@@ -1,6 +1,6 @@
 import random, torch, os, numpy as np
 import torch.nn as nn
-import copy
+import copy, zipfile 
 
 def save_checkpoint(model, optimizer, filename="my_checkpoint.pth.tar"):
     print("=> Saving checkpoint")
@@ -32,3 +32,32 @@ def seed_everything(seed=42):
     torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
+    
+# unzip file 
+def unzip_file(zip_file_path, extract_to):
+    with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+        zip_ref.extractall(extract_to)
+        
+def remove_non_image_files(directory):
+    """
+    Removes files that are not images from the directory 
+    including in the subdirectories
+    """
+    print("Processing directory:", directory)
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            file_path = os.path.join(root, file)
+            if not (file.endswith(".jpg") or file.endswith(".png")):
+                print("Removing:", file_path)
+                os.remove(file_path)
+                
+def print_non_image_files(directory):
+    """
+    Print all files that are not images from the directory including in the subdirectories
+    """
+    print("Processing directory:", directory)
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            file_path = os.path.join(root, file)
+            if not (file.endswith(".jpg") or file.endswith(".png")):
+                print("Non-image file:", file_path)

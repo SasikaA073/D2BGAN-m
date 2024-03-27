@@ -7,6 +7,8 @@ from albumentations.pytorch import ToTensorV2
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 NUM_WORKERS = os.cpu_count()
 
+DATASET_ZIP_NAME = "LOLdataset.zip"
+DATASET_DIR = "LOLdataset"
 TRAIN_DIR = "LOLdataset/our485/"
 VAL_DIR = "LOLdataset/eval15/"
 

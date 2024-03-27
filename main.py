@@ -1,4 +1,4 @@
-import os, time, subprocess
+import os, time, subprocess, sys
 
 import torch
 from torch import nn
@@ -7,7 +7,8 @@ from torch.utils.data import DataLoader
 
 import config
 from dataset import LOLDataset
-from utils import save_checkpoint, load_checkpoint, seed_everything
+from utils import save_checkpoint, load_checkpoint, seed_everything, unzip_file
+from utils import remove_non_image_files
 from discriminator_model import Discriminator
 from generator_model import Generator
 from train import train_d2bgan
@@ -19,26 +20,39 @@ def main():
     
     ### Download dataset 
     # If dataset is not downloaded, download it
-    if not os.path.exists(config.DARK_DIR):
-        url = config.DATASET_URL 
-        output_file = config.DATASET_ZIP_NAME
-        
-        # Run wget command using subprocess to download the dataset
-        subprocess.run(['wget', url])
+    if not os.path.exists(config.DATASET_DIR):
+        try:
+            print("Dataset directory does not exist. Downloading the dataset...")
+            url = config.DATASET_URL 
 
-        # Unzip the downloaded file
-        subprocess.run(['unzip', output_file])
+            # Run wget command using subprocess to download the dataset
+            # TODO: IMPLEMENT THIS IN GDOWN
+            # subprocess.run(['wget', url])
+            print("Dataset downloaded...")
 
-        # Remove the downloaded zip file
-        os.remove(output_file)
-        
-        # Run wget command using subprocess
-        subprocess.run(['wget', '--no-check-certificate', url, '-O', output_file])
+            # Unzip the downloaded file
+            # unzip_file(config.DATASET_ZIP_NAME, config.DATASET_DIR)
+            print(config.DATASET_ZIP_NAME)
+            print("Dataset unzipped...")
 
+            # Remove the downloaded zip file
+            os.remove(config.DATASET_ZIP_NAME)
+            print("Dataset zip file removed...")
+            
+            # Run wget command using subprocess
+            # subprocess.run(['wget', '--no-check-certificate', url, '-O', output_file])
+        except Exception as e:
+            print(e)
+            sys.exit()
+            
+    print("Dataset is ready...")
     ### Make dataloaders
     
+    # Remove files that are not images
+    remove_non_image_files(config.DATASET_DIR) 
+    print("Removed non-image files...")
     
-    ### Make Discriminators
+    ### Discriminators
     dark_c1_discriminator = Discriminator(in_channels=3).to(config.DEVICE)
     dark_c2_discriminator = Discriminator(in_channels=3).to(config.DEVICE)  # how to differentiate the following 4???
     dark_t_discriminator = Discriminator(in_channels=3).to(config.DEVICE)
@@ -50,7 +64,7 @@ def main():
     bright_e_discriminator = Discriminator(in_channels=3).to(config.DEVICE)
 
     #########################################################
-
+    ### Generators
     dark_generator = Generator(in_channels=3, out_channels=64).to(config.DEVICE)
     bright_generator = Generator(in_channels=3, out_channels=64).to(config.DEVICE)
 
